@@ -276,3 +276,10 @@ Most role names are from [here](https://github.com/linexjlin/GPTs/tree/main?tab=
 - [LeetCoder Ace](./prompts/LeetCoder%20Ace.md) by YANG YANG
 - [咪蒙标题](./prompts/咪蒙标题.md) by Haibo Liu
 - [Summarizer ㆍYouTube PDF Book Article Web Text Code](./prompts/Summarizer%20%E2%80%A2YouTube%20PDF%20Book%20Article%20Web%20Text%20Code.md) by Frames
+
+## TODO
+- [ ] prompt文件弹窗预览
+- [ ] 自定义prompt并输入
+- [ ] 流水线LLM对话框架
+- [ ] 仲裁LLM对话框架
+- [ ] 会话历史记录开关
