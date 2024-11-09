@@ -283,3 +283,12 @@ Most role names are from [here](https://github.com/linexjlin/GPTs/tree/main?tab=
 - [ ] 流水线LLM对话框架
 - [ ] 仲裁LLM对话框架
 - [ ] 会话历史记录开关
+```bash
+conda create -n chat python=3.11
+```
+```bash
+conda activate chat
+```
+```bash
+pip install -r ./requirements.txt
+```
