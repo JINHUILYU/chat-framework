@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 import sys
-from LLM import LLM, pipeline
+from LLM import LLM, pipeline, arbitration
 
 # 角色对应的对话模板
 prompts = {
@@ -34,6 +34,12 @@ class MainWindow(QMainWindow):
         self.pipelineBotFlag = False
         self.pipeline_model = None
         self.pipeline_api_key = None
+
+        # Arbitration
+        self.arbitrationBot = None
+        self.arbitrationBotFlag = False
+        self.arbitration_model = None
+        self.arbitration_api_key = None
 
         # 设置主窗口
         self.setWindowTitle("Chat Bot Interface")
@@ -235,7 +241,6 @@ class MainWindow(QMainWindow):
         self.custom_chat_page.setLayout(custom_chat_layout)
         self.stacked_widget.addWidget(self.custom_chat_page)
 
-        # TODO:设置pipeline页面
         # 创建 Pipeline 页面
         self.pipeline_page = QWidget()
         pipeline_layout = QVBoxLayout(self.pipeline_page)
@@ -316,8 +321,88 @@ class MainWindow(QMainWindow):
         pipeline_chat_layout.addLayout(pipeline_bottom_input_layout)
         self.pipeline_chat_page.setLayout(pipeline_chat_layout)
         self.stacked_widget.addWidget(self.pipeline_chat_page)
-        # TODO:设置arbitration页面
 
+        # TODO:设置arbitration页面
+        # 创建arbitration页面
+        self.arbitration_page = QWidget()
+        arbitration_layout = QVBoxLayout(self.arbitration_page)
+
+        # 添加流程图占位符
+        arbitration_flowchart = QLabel("Arbitration Flowchart")  # 替换为您实际的流程图实现
+        arbitration_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        arbitration_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
+        arbitration_layout.addWidget(arbitration_flowchart)
+
+        # 添加 Prompt-1, Prompt-2, Prompt-3, Prompt-4 的输入框
+        self.arbitration_inputs = []
+        for i in range(1, 5):
+            prompt_label = QLabel(f"Prompt-{i}")
+            prompt_input = QLineEdit()
+            prompt_input.setPlaceholderText(f"Input for Prompt-{i}")
+            prompt_layout = QHBoxLayout()
+            prompt_layout.addWidget(prompt_label)
+            prompt_layout.addWidget(prompt_input)
+            arbitration_layout.addLayout(prompt_layout)
+            self.arbitration_inputs.append(prompt_input)
+
+        # 添加 Enter 按钮
+        arbitration_enter_button = QPushButton("Enter")
+        arbitration_enter_button.clicked.connect(self.arbitration_submit)
+        arbitration_layout.addWidget(arbitration_enter_button)
+
+        # 添加 Arbitration 页面到 stacked_widget
+        self.stacked_widget.addWidget(self.arbitration_page)
+
+        # 设置 Arbitration 对话页面
+        self.arbitration_chat_page = QWidget()
+        arbitration_chat_layout = QVBoxLayout(self.arbitration_chat_page)
+
+        # 添加顶部按钮 (Model 和 API-KEY)
+        arbitration_chat_page_top_buttons_layout = QHBoxLayout()
+
+        # Model 下拉框
+        self.arbitration_chat_page_model_combo = QComboBox()
+        self.arbitration_chat_page_model_combo.addItems(["Default", "Kimi", "GPT-3.5", "GPT-4", "GPT-4o"])  # 添加模型名称
+        self.arbitration_chat_page_model_combo.setCurrentIndex(0)  # 默认选中第一个
+        self.arbitration_chat_page_model_combo.setFixedSize(100, 30)
+
+        # API-KEY 输入框
+        self.arbitration_api_key_input = QLineEdit()
+        self.arbitration_api_key_input.setPlaceholderText("Enter API-KEY")
+        self.arbitration_api_key_input.setFixedSize(150, 30)
+
+        arbitration_chat_page_top_buttons_layout.addWidget(self.arbitration_chat_page_model_combo)
+        arbitration_chat_page_top_buttons_layout.addWidget(self.arbitration_api_key_input)
+        arbitration_chat_page_top_buttons_layout.addStretch()
+
+        # 添加聊天显示区域(支持滚动)
+        arbitration_chat_scroll_area = QScrollArea()
+        arbitration_chat_scroll_area.setWidgetResizable(True)
+
+        # 创建用于展示消息的容器
+        self.arbitration_chat_display_widget = QWidget()
+        self.arbitration_chat_display_layout = QVBoxLayout(self.arbitration_chat_display_widget)
+        self.arbitration_chat_display_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 消息从顶部开始显示
+        arbitration_chat_scroll_area.setWidget(self.arbitration_chat_display_widget)
+
+        # 添加滚动区域到布局中
+        arbitration_chat_layout.addLayout(arbitration_chat_page_top_buttons_layout)
+        arbitration_chat_layout.addWidget(arbitration_chat_scroll_area)
+
+        # 添加底部输入框
+        arbitration_bottom_input_layout = QHBoxLayout()
+        self.arbitration_input_box = QLineEdit()
+        self.arbitration_input_box.setPlaceholderText("Type your message here...")
+        arbitration_enter_button = QPushButton("Enter")
+        arbitration_enter_button.setFixedSize(50, 30)
+        arbitration_enter_button.clicked.connect(self.arbitration_add_message)  # 点击按钮发送消息
+        arbitration_bottom_input_layout.addWidget(self.arbitration_input_box)
+        arbitration_bottom_input_layout.addWidget(arbitration_enter_button)
+
+        # 组合布局
+        arbitration_chat_layout.addLayout(arbitration_bottom_input_layout)
+        self.arbitration_chat_page.setLayout(arbitration_chat_layout)
+        self.stacked_widget.addWidget(self.arbitration_chat_page)
 
         # 设置默认显示的页面
         self.stacked_widget.setCurrentWidget(self.pages["Home"])
@@ -335,22 +420,29 @@ class MainWindow(QMainWindow):
         self.clear_pipeline_messages()
         self.clear_custom_messages()
         self.clear_roles_messages()
+        self.clear_arbitration_messages()
+        self.pipelineBotFlag = False
+        self.customBotFlag = False
+        self.roleBotFlag = False
+        self.arbitrationBotFlag = False
 
     def change_page(self):
         # 切换右侧显示页面
         sender = self.sender()
         self.clear()  # 清空聊天记录
         # self.clear_custom_messages()  # 清空聊天记录
-        self.customBotFlag = False
+        # self.customBotFlag = False
         # self.clear_roles_messages()  # 清空聊天记录
-        self.roleBotFlag = False
-        self.pipelineBotFlag = False
+        # self.roleBotFlag = False
+        # self.pipelineBotFlag = False
         if sender == self.buttons["Roles"]:
             self.stacked_widget.setCurrentWidget(self.roles_page)
         elif sender == self.buttons["Custom"]:
             self.stacked_widget.setCurrentWidget(self.custom_chat_page)
         elif sender == self.buttons["Pipeline"]:
             self.stacked_widget.setCurrentWidget(self.pipeline_page)
+        elif sender == self.buttons["Arbitration"]:
+            self.stacked_widget.setCurrentWidget(self.arbitration_page)
         else:
             for name, button in self.buttons.items():
                 if button.isChecked():
@@ -513,6 +605,65 @@ class MainWindow(QMainWindow):
         # 清空聊天记录
         for i in range(self.pipeline_chat_display_layout.count()):
             self.pipeline_chat_display_layout.itemAt(i).widget().deleteLater()
+
+    def arbitration_submit(self):
+        # 提交 Arbitration 输入框内容
+        prompt_texts = [input_box.text() for input_box in self.arbitration_inputs]
+        print("Arbitration Inputs:", prompt_texts)
+        # 进入Arbitration聊天页面
+        self.clear()
+        # self.pipelineBotFlag = False
+        # self.customBotFlag = False
+        # self.roleBotFlag = False
+        # 切换到聊天页面
+        self.stacked_widget.setCurrentWidget(self.arbitration_chat_page)
+
+    def arbitration_add_message(self):
+        # 添加新的消息到聊天记录中
+        message = self.arbitration_input_box.text()
+        print(message)
+        if message:
+            # 如果model或者api_key修改了，重新初始化聊天机器人
+            if self.arbitrationBot and (self.arbitration_chat_page_model_combo.currentText() != self.arbitration_model or
+                                   self.arbitration_api_key_input.text() != self.arbitration_api_key):
+                self.arbitrationBot = None
+                self.arbitrationBotFlag = False
+
+            # 初始化聊天机器人
+            if not self.arbitrationBot or not self.arbitrationBotFlag:
+                # 根据角色初始化聊天机器人
+                prompt_1 = self.arbitration_inputs[0].text()  # 获取角色对应的对话模板
+                prompt_2 = self.arbitration_inputs[1].text()  # 获取角色对应的对话模板
+                prompt_3 = self.arbitration_inputs[2].text()  # 获取角色对应的对话模板
+                prompt_4 = self.arbitration_inputs[3].text()  # 获取角色对应的对话模板
+                print(prompt_1, prompt_2, prompt_3, prompt_4)
+                self.arbitration_model = self.arbitration_chat_page_model_combo.currentText()  # 获取下拉框中选择的模型
+                self.arbitration_api_key = self.arbitration_api_key_input.text()  # 获取输入框中输入的API-KEY
+                # 如果模型不为Default，且API-KEY为空，则提示用户输入API-KEY
+                if self.arbitration_model != "Default" and not self.arbitration_api_key:
+                    # 弹窗提示用户输入API-KEY
+                    QMessageBox.warning(self, "API-KEY Required", "Please enter your API-KEY to use this model.")
+                    return  # 中断，避免继续执行后续逻辑
+                print(self.arbitration_model, self.arbitration_api_key)
+                self.arbitrationBot = arbitration(model=self.arbitration_model, key=self.pipeline_api_key, prompt_1=prompt_1, prompt_2=prompt_2, prompt_3=prompt_3, prompt_4=prompt_4)
+                self.pipelineBotFlag = True
+
+            message_label = QLabel("User:\n" + message)
+            message_label.setWordWrap(True)  # 启用自动换行
+            message_label.setStyleSheet("border: 1px solid black; padding: 5px;")
+            self.arbitration_chat_display_layout.addWidget(message_label)
+            self.arbitration_input_box.clear()
+            # 与聊天机器人交互
+            answer = self.arbitrationBot.query(message)
+            message_label = QLabel("Chat Bot:\n" + answer)
+            message_label.setWordWrap(True)  # 启用自动换行
+            message_label.setStyleSheet("border: 1px solid black; padding: 5px;")
+            self.arbitration_chat_display_layout.addWidget(message_label)
+
+    def clear_arbitration_messages(self):
+        # 清空聊天记录
+        for i in range(self.arbitration_chat_display_layout.count()):
+            self.arbitration_chat_display_layout.itemAt(i).widget().deleteLater()
 
 
 if __name__ == "__main__":
