@@ -279,9 +279,9 @@ Most role names are from [here](https://github.com/linexjlin/GPTs/tree/main?tab=
 
 ## TODO
 - [ ] prompt文件弹窗预览
-- [ ] 自定义prompt并输入
-- [ ] 流水线LLM对话框架
-- [ ] 仲裁LLM对话框架
+- [x] 自定义prompt并输入
+- [x] 流水线LLM对话框架
+- [x] 仲裁LLM对话框架
 - [ ] 会话历史记录开关
 ```bash
 conda create -n chat python=3.11
