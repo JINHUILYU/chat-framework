@@ -1,3 +1,4 @@
+from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QStackedWidget, QButtonGroup,
     QGridLayout, QLineEdit, QScrollArea, QComboBox, QSizePolicy, QMessageBox
@@ -5,11 +6,14 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 import sys
 from LLM import LLM, pipeline, arbitration
+from prompts import prompts
+import os, sys
 
-# 角色对应的对话模板
-prompts = {
-    "Assist": "You are an AI assistant. You should answer the user's question politely.",
-}
+
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 
 class MainWindow(QMainWindow):
@@ -117,13 +121,11 @@ class MainWindow(QMainWindow):
         roles_layout = QGridLayout(self.roles_page)
         roles_layout.setSpacing(10)
 
-        # 创建10个圆形按钮代表角色
-        for i in range(10):
-            if i == 0:
-                role_button = QPushButton("Assist")
-            else:
-                role_button = QPushButton(str(i + 1) if i < 20 else "..")
-            role_button.setFixedSize(50, 50)
+        # 创建角色按钮
+        i = 0
+        for key, val in prompts.items():
+            role_button = QPushButton(key)
+            role_button.setFixedSize(200, 100)
             role_button.setStyleSheet(
                 """
                 QPushButton {
@@ -135,6 +137,7 @@ class MainWindow(QMainWindow):
             # 用户点击时获取角色名称
             role_button.clicked.connect(lambda _, btn=role_button: self.enter_chat(btn))  # 点击角色进入聊天页面
             roles_layout.addWidget(role_button, i // 5, i % 5)  # 每行5个按钮
+            i += 1
         # 角色选择页面布局
         self.roles_page.setLayout(roles_layout)
         self.stacked_widget.addWidget(self.roles_page)
@@ -157,6 +160,11 @@ class MainWindow(QMainWindow):
         self.role_api_key_input.setPlaceholderText("Enter API-KEY")
         self.role_api_key_input.setFixedSize(150, 30)
 
+        # 右侧显示当前的Role，用于提示用户当前选择的角色
+        self.role_label = QLabel("Role: " + str(self.role))
+        self.role_label.setFixedSize(100, 30)
+
+        role_chat_page_top_buttons_layout.addWidget(self.role_label)
         role_chat_page_top_buttons_layout.addWidget(self.role_chat_page_model_combo)
         role_chat_page_top_buttons_layout.addWidget(self.role_api_key_input)
         role_chat_page_top_buttons_layout.addStretch()
@@ -245,11 +253,19 @@ class MainWindow(QMainWindow):
         self.pipeline_page = QWidget()
         pipeline_layout = QVBoxLayout(self.pipeline_page)
 
-        # 添加流程图占位符
-        pipeline_flowchart = QLabel("Pipeline Flowchart")  # 替换为您实际的流程图实现
+        # 添加流程图图片
+        pipeline_flowchart = QLabel()
+        pipeline_flowchart.setPixmap(QPixmap(get_resource_path("images/pipeline.png")))  # 加载并显示图片
+        pipeline_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
         pipeline_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
         pipeline_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
         pipeline_layout.addWidget(pipeline_flowchart)
+
+        # # 添加流程图占位符
+        # pipeline_flowchart = QLabel("Pipeline Flowchart")  # 替换为您实际的流程图实现
+        # pipeline_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # pipeline_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
+        # pipeline_layout.addWidget(pipeline_flowchart)
 
         # 添加 Prompt-1, Prompt-2, Prompt-3 的输入框
         self.pipeline_inputs = []
@@ -327,11 +343,19 @@ class MainWindow(QMainWindow):
         self.arbitration_page = QWidget()
         arbitration_layout = QVBoxLayout(self.arbitration_page)
 
-        # 添加流程图占位符
-        arbitration_flowchart = QLabel("Arbitration Flowchart")  # 替换为您实际的流程图实现
+        # 添加流程图图片
+        arbitration_flowchart = QLabel()
+        arbitration_flowchart.setPixmap(QPixmap(get_resource_path("images/arbitration.png")))  # 加载并显示图片
+        arbitration_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
         arbitration_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
         arbitration_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
         arbitration_layout.addWidget(arbitration_flowchart)
+
+        # # 添加流程图占位符
+        # arbitration_flowchart = QLabel("Arbitration Flowchart")  # 替换为您实际的流程图实现
+        # arbitration_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # arbitration_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
+        # arbitration_layout.addWidget(arbitration_flowchart)
 
         # 添加 Prompt-1, Prompt-2, Prompt-3, Prompt-4 的输入框
         self.arbitration_inputs = []
@@ -450,12 +474,15 @@ class MainWindow(QMainWindow):
 
     def enter_chat(self, role_button):
         self.role = role_button.text()
+        # print(self.role)
         self.clear()
-        self.pipelineBotFlag = False
+        # self.pipelineBotFlag = False
         # self.clear_custom_messages()
-        self.customBotFlag = False
+        # self.customBotFlag = False
         # self.clear_roles_messages()
-        self.roleBotFlag = False
+        # self.roleBotFlag = False
+        # 更新角色标签的文本
+        self.role_label.setText("Role: " + str(self.role))
         # 切换到聊天页面
         self.stacked_widget.setCurrentWidget(self.role_chat_page)
 
@@ -486,7 +513,6 @@ class MainWindow(QMainWindow):
                 print(self.role_model, self.role_api_key)
                 self.roleBot = LLM(prompt=prompt, model=self.role_model, key=self.role_api_key)
                 self.roleBotFlag = True
-
 
             message_label = QLabel("User:\n" + message)
             message_label.setWordWrap(True)  # 启用自动换行
@@ -557,6 +583,7 @@ class MainWindow(QMainWindow):
         self.pipelineBotFlag = False
         self.customBotFlag = False
         self.roleBotFlag = False
+        self.arbitrationBotFlag = False
         # 切换到聊天页面
         self.stacked_widget.setCurrentWidget(self.pipeline_chat_page)
 
@@ -567,7 +594,7 @@ class MainWindow(QMainWindow):
         if message:
             # 如果model或者api_key修改了，重新初始化聊天机器人
             if self.pipelineBot and (self.pipeline_chat_page_model_combo.currentText() != self.pipeline_model or
-                                   self.pipeline_api_key_input.text() != self.pipeline_api_key):
+                                     self.pipeline_api_key_input.text() != self.pipeline_api_key):
                 self.pipelineBot = None
                 self.pipelineBotFlag = False
 
@@ -586,7 +613,8 @@ class MainWindow(QMainWindow):
                     QMessageBox.warning(self, "API-KEY Required", "Please enter your API-KEY to use this model.")
                     return  # 中断，避免继续执行后续逻辑
                 print(self.pipeline_model, self.pipeline_api_key)
-                self.pipelineBot = pipeline(model=self.pipeline_model, key=self.pipeline_api_key, prompt_1=prompt_1, prompt_2=prompt_2, prompt_3=prompt_3)
+                self.pipelineBot = pipeline(model=self.pipeline_model, key=self.pipeline_api_key, prompt_1=prompt_1,
+                                            prompt_2=prompt_2, prompt_3=prompt_3)
                 self.pipelineBotFlag = True
 
             message_label = QLabel("User:\n" + message)
@@ -624,8 +652,9 @@ class MainWindow(QMainWindow):
         print(message)
         if message:
             # 如果model或者api_key修改了，重新初始化聊天机器人
-            if self.arbitrationBot and (self.arbitration_chat_page_model_combo.currentText() != self.arbitration_model or
-                                   self.arbitration_api_key_input.text() != self.arbitration_api_key):
+            if self.arbitrationBot and (
+                    self.arbitration_chat_page_model_combo.currentText() != self.arbitration_model or
+                    self.arbitration_api_key_input.text() != self.arbitration_api_key):
                 self.arbitrationBot = None
                 self.arbitrationBotFlag = False
 
@@ -645,7 +674,9 @@ class MainWindow(QMainWindow):
                     QMessageBox.warning(self, "API-KEY Required", "Please enter your API-KEY to use this model.")
                     return  # 中断，避免继续执行后续逻辑
                 print(self.arbitration_model, self.arbitration_api_key)
-                self.arbitrationBot = arbitration(model=self.arbitration_model, key=self.pipeline_api_key, prompt_1=prompt_1, prompt_2=prompt_2, prompt_3=prompt_3, prompt_4=prompt_4)
+                self.arbitrationBot = arbitration(model=self.arbitration_model, key=self.pipeline_api_key,
+                                                  prompt_1=prompt_1, prompt_2=prompt_2, prompt_3=prompt_3,
+                                                  prompt_4=prompt_4)
                 self.pipelineBotFlag = True
 
             message_label = QLabel("User:\n" + message)
