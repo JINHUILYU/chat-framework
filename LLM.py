@@ -83,7 +83,8 @@ class pipeline:
         answer_1 = self.llm_1.query(question)
         answer_2 = self.llm_2.query(answer_1)
         answer_3 = self.llm_3.query(answer_2)
-        return answer_3
+        response = f"The question is {question}\n Answer 1: {answer_1}\n Answer 2: {answer_2}\n Answer 3: {answer_3}"
+        return response
 
 
 class arbitration:

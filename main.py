@@ -254,9 +254,20 @@ class MainWindow(QMainWindow):
         pipeline_layout = QVBoxLayout(self.pipeline_page)
 
         # 添加流程图图片
+        target_width = 1000
+        target_height = 1000
+
+        # 添加流程图图片
         pipeline_flowchart = QLabel()
-        pipeline_flowchart.setPixmap(QPixmap(get_resource_path("images/pipeline.png")))  # 加载并显示图片
-        pipeline_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
+        pipeline_pixmap = QPixmap(get_resource_path("images/pipeline.png"))
+        # 缩放图片以适应目标尺寸
+        pipeline_scaled_pixmap = pipeline_pixmap.scaled(target_width, target_height, Qt.AspectRatioMode.KeepAspectRatio,
+                                      Qt.TransformationMode.SmoothTransformation)
+
+        pipeline_flowchart.setPixmap(pipeline_scaled_pixmap)  # 设置缩放后的图片
+        pipeline_flowchart.setScaledContents(False)  # 禁用 QLabel 自动缩放，已手动缩放
+        # pipeline_flowchart.setPixmap(QPixmap(get_resource_path("images/pipeline.png")))  # 加载并显示图片
+        # pipeline_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
         pipeline_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
         pipeline_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
         pipeline_layout.addWidget(pipeline_flowchart)
@@ -343,10 +354,15 @@ class MainWindow(QMainWindow):
         self.arbitration_page = QWidget()
         arbitration_layout = QVBoxLayout(self.arbitration_page)
 
-        # 添加流程图图片
         arbitration_flowchart = QLabel()
-        arbitration_flowchart.setPixmap(QPixmap(get_resource_path("images/arbitration.png")))  # 加载并显示图片
-        arbitration_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
+        arbitration_pixmap = QPixmap(get_resource_path("images/arbitration.png"))
+        # 缩放图片到目标尺寸
+        arbitration_scaled_pixmap = arbitration_pixmap.scaled(target_width, target_height, Qt.AspectRatioMode.KeepAspectRatio,
+                                      Qt.TransformationMode.SmoothTransformation)
+        arbitration_flowchart.setPixmap(arbitration_scaled_pixmap)  # 设置缩放后的图片
+        arbitration_flowchart.setScaledContents(False)  # 禁用 QLabel 自动缩放，已手动缩放
+        # arbitration_flowchart.setPixmap(QPixmap(get_resource_path("images/arbitration.png")))  # 加载并显示图片
+        # arbitration_flowchart.setScaledContents(True)  # 缩放图片以适应标签大小
         arbitration_flowchart.setAlignment(Qt.AlignmentFlag.AlignCenter)
         arbitration_flowchart.setStyleSheet("border: 1px solid black; padding: 10px;")
         arbitration_layout.addWidget(arbitration_flowchart)
