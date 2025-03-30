@@ -5,7 +5,8 @@ base_urls = {
     "Kimi": "https://api.moonshot.cn/v1",
     "GPT-3.5": "https://api.openai.com/v1",
     "GPT-4": "https://api.openai.com/v1",
-    "GPT-4o": "https://api.openai.com/v1",
+    # "GPT-4o": "https://api.openai.com/v1",
+    "GPT-4o": "https://api.chatanywhere.tech/v1",
     "Default": "https://api.chatanywhere.tech/v1",  # 转发接口
 }
 
@@ -98,9 +99,11 @@ class arbitration:
         answer_1 = self.llm_1.query(question)
         answer_2 = self.llm_2.query(question)
         answer_3 = self.llm_3.query(question)
-        answers = f"The question is {question}, the answers are answer_1: '{answer_1}', answer_2: '{answer_2}', answer_3: '{answer_3}', you need to choose the correct one and explain why. The response format is: Question: {question}. Answer_1: {answer_1}. Answer_2: {answer_2}. Answer_3: {answer_3}. The scores of each answer: xxx. The correct answer is: xxx. The reason is: xxx. Let's think step by step."
-        print(answers)
-        answer_4 = self.llm_4.query(answers)
+        # answers = f"The question is {question}, the answers are answer_1: '{answer_1}', answer_2: '{answer_2}', answer_3: '{answer_3}', you need to choose the correct one and explain why. The response format is: Question: {question}. Answer_1: {answer_1}. Answer_2: {answer_2}. Answer_3: {answer_3}. The scores of each answer: xxx. The correct answer is: xxx. The reason is: xxx. Let's think step by step."
+        # print(answers)
+        sent = f"Sentence: {question}. LTL answer: [{answer_1}, {answer_2}, {answer_3}]."
+        # answer_4 = self.llm_4.query(answers)
+        answer_4 = self.llm_4.query(sent)
         print(answer_4)
         response = f"The question is {question}\n Answer 1: {answer_1}\n Answer 2: {answer_2}\n Answer 3: {answer_3}\n {answer_4}"
         return response

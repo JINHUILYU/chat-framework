@@ -1,4 +1,5 @@
 # 通用大模型对话框架
+
 ## 1. 主要角色
 
 Most role names are from [here](https://github.com/linexjlin/GPTs/tree/main?tab=readme-ov-file).
@@ -277,18 +278,54 @@ Most role names are from [here](https://github.com/linexjlin/GPTs/tree/main?tab=
 - [咪蒙标题](./prompts/咪蒙标题.md) by Haibo Liu
 - [Summarizer ㆍYouTube PDF Book Article Web Text Code](./prompts/Summarizer%20%E2%80%A2YouTube%20PDF%20Book%20Article%20Web%20Text%20Code.md) by Frames
 
+## 2. Images
+
+1. Home
+  
+  ![Home](./assets/Home.png)
+
+2. Roles
+  
+  ![Roles-1](./assets/Roles-1.png)
+
+  ![Roles-2](./assets/Roles-2.png)
+
+3. Custom
+
+  ![Custom](./assets/Custom.png)
+
+4. Pipeline
+  
+  ![Pipeline](./assets/Pipeline.png)
+
+5. Arbitration
+  
+  ![Arbitration](./assets/Arbitration.png)
+
+## How to start
+
+1. Create a python enviroment.
+  
+  ```bash
+  conda create -n chat python=3.11
+  ```
+
+2. Activate the enviroment.
+
+  ```bash
+  conda activate chat
+  ```
+
+3. Install the requirements.
+
+  ```bash
+  pip install -r ./requirements.txt
+  ```
+
 ## TODO
+
 - [ ] prompt文件弹窗预览
 - [x] 自定义prompt并输入
 - [x] 流水线LLM对话框架
 - [x] 仲裁LLM对话框架
 - [ ] 会话历史记录开关
-```bash
-conda create -n chat python=3.11
-```
-```bash
-conda activate chat
-```
-```bash
-pip install -r ./requirements.txt
-```
